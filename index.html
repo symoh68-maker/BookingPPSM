@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Tempahan Bilik PPSM</title>
+    <!-- Menggunakan font 'Inter' untuk gaya korporat/profesional -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* GAYA ASAS KORPORAT */
+        body { 
+            font-family: 'Inter', sans-serif; 
+            margin: 0; 
+            padding: 40px 20px; 
+            background-color: #f1f5f9; /* Kelabu lembut */
+            color: #1e293b; 
+            min-height: 100vh;
+        }
+        
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            position: relative; 
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 8px; /* Bucu lebih tajam (corporate look) */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e2e8f0;
+        }
+
+        /* CONTAINER LOGO */
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 40px;
+            margin-bottom: 25px;
+            padding-bottom: 25px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .logo-usm { max-height: 80px; width: auto; object-fit: contain; }
+        .logo-math { max-height: 120px; width: auto; object-fit: contain; }
+        
+        /* BUTANG BAHASA */
+        .lang-switch { position: absolute; top: 20px; right: 20px; display: flex; gap: 5px; background: #f8fafc; padding: 4px; border-radius: 6px; border: 1px solid #cbd5e1;}
+        .lang-switch button { border: none; background: transparent; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-family: 'Inter', sans-serif; font-weight: 500; font-size: 13px; color: #64748b; transition: 0.2s; }
+        .lang-switch button:hover { color: #0f172a; background: #e2e8f0; }
+        .lang-switch button.active-lang { background: #0f172a; color: #ffffff; font-weight: 600; }
+        
+        .header-title { text-align: center; margin-bottom: 40px; color: #0f172a; font-weight: 700; font-size: 26px; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        /* TAB UTAMA (Gaya Korporat) */
+        .tabs { display: flex; border-bottom: 2px solid #e2e8f0; margin-bottom: 30px; gap: 4px; }
+        .tabs button { background-color: #f8fafc; color: #475569; border: 1px solid #e2e8f0; border-bottom: none; padding: 12px 24px; cursor: pointer; border-radius: 6px 6px 0 0; font-size: 14px; font-weight: 500; transition: all 0.2s ease; }
+        .tabs button:hover { background: #f1f5f9; color: #0f172a; }
+        .tabs button.active-tab { background: #ffffff; color: #2563eb; border-top: 3px solid #2563eb; font-weight: 600; margin-bottom: -2px; border-bottom: 2px solid #ffffff; }
+        
+        .tab-content { display: none; background: #ffffff; animation: fadeIn 0.3s ease; }
+        .active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        h2 { margin-top: 0; color: #1e293b; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 24px; font-weight: 600; font-size: 18px;}
+        
+        /* SUB-TAB (Pilhan Kategori) */
+        .sub-tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap;}
+        .sub-tabs button { background: #f8fafc; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 6px; font-family: 'Inter', sans-serif; font-weight: 500; font-size: 14px; cursor: pointer; color: #475569; transition: 0.2s;}
+        .sub-tabs button:hover { background: #e2e8f0; color: #0f172a; }
+        .sub-tabs button.active { background: #2563eb; color: #ffffff; border-color: #2563eb; }
+        
+        /* PILIHAN BILIK (RADIO BUTTONS) */
+        .room-options { display: none; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 30px;}
+        .room-options.active { display: grid; }
+        .room-card { display: block; cursor: pointer; position: relative;}
+        .room-card input { position: absolute; opacity: 0; cursor: pointer; }
+        .room-card span { display: block; padding: 14px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; text-align: center; font-weight: 500; color: #334155; transition: 0.2s; font-size: 14px;}
+        .room-card:hover span { border-color: #94a3b8; background: #f8fafc;}
+        .room-card input:checked ~ span { background: #eff6ff; border-color: #2563eb; color: #1d4ed8; font-weight: 600; box-shadow: 0 0 0 1px #2563eb;}
+
+        .admin-note { grid-column: 1 / -1; color: #b91c1c; font-size: 13px; font-weight: 500; margin-bottom: 10px; padding: 10px 12px; background: #fef2f2; border-radius: 6px; border: 1px solid #fca5a5; display: flex; align-items: center; gap: 8px;}
+
+        /* BORANG */
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+        .full-width { grid-column: 1 / -1; }
+        .form-group label.main-label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 13px; color: #475569; text-transform: uppercase; letter-spacing: 0.5px;}
+        
+        .input-large, .input-font-only { width: 100%; padding: 10px 14px; font-size: 14px; font-family: 'Inter', sans-serif; box-sizing: border-box; border: 1px solid #cbd5e1; border-radius: 6px; background-color: #ffffff; transition: 0.2s; color: #1e293b; }
+        .input-large:focus, .input-font-only:focus { border-color: #2563eb; outline: none; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+        .input-large:disabled { background-color: #f1f5f9; color: #94a3b8; cursor: not-allowed; }
+        
+        .radio-group { display: flex; gap: 24px; padding: 10px 0; }
+        .radio-group label { display: flex; align-items: center; font-weight: 500; cursor: pointer; color: #1e293b; font-size: 14px;}
+        .radio-group input { margin-right: 8px; cursor: pointer; accent-color: #2563eb; width: 16px; height: 16px;}
+        
+        /* BUTANG TINDAKAN */
+        button.submit-btn { background: #2563eb; color: #ffffff; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; width: auto; min-width: 200px; margin-top: 20px; transition: 0.2s; letter-spacing: 0.3px;}
+        button.submit-btn:hover { background: #1d4ed8; }
+        button.submit-btn:disabled { background: #94a3b8; cursor: not-allowed; }
+        
+        .action-buttons { display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 20px; }
+        .print-btn { background: #475569; color: white; padding: 10px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; transition: 0.2s; display: inline-flex; align-items: center; gap: 8px;}
+        .print-btn:hover { background: #334155; }
+        
+        /* JADUAL */
+        .table-responsive { overflow-x: auto; margin-top: 15px; margin-bottom: 40px; border: 1px solid #e2e8f0; border-radius: 8px;}
+        table { width: 100%; border-collapse: collapse; background: #ffffff; text-align: left; font-size: 13px;}
+        #senarai-table { min-width: 800px; } 
+        
+        th, td { border-bottom: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; padding: 12px 16px; vertical-align: middle; }
+        th { background: #f8fafc; color: #475569; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; font-size: 12px; }
+        td:first-child { font-weight: 600; color: #0f172a; background-color: #f8fafc; }
+        tbody tr:hover { background-color: #f1f5f9; }
+        
+        .room-title { color: #1e293b; background: #f8fafc; padding: 12px 16px; border: 1px solid #e2e8f0; border-bottom: none; border-radius: 8px 8px 0 0; margin: 30px 0 0 0; font-size: 15px; font-weight: 600;}
+        
+        /* SLOT JADUAL KORPORAT */
+        .booking-slot { 
+            background: #eff6ff; 
+            border-left: 4px solid #3b82f6; 
+            font-size: 12px; 
+            padding: 10px; 
+            border-radius: 4px; 
+            margin: 4px; 
+            color: #1e3a8a; 
+            text-align: left; 
+            line-height: 1.4; 
+            border-right: 1px solid #bfdbfe; 
+            border-top: 1px solid #bfdbfe; 
+            border-bottom: 1px solid #bfdbfe;
+            height: calc(100% - 8px); 
+            box-sizing: border-box;
+        }
+        .booking-slot strong { display: block; font-size: 13px; color: #1e40af; margin-bottom: 2px;}
+        
+        .btn-batal { background: #ef4444; color: white; border: none; border-radius: 4px; font-size: 12px; padding: 6px 12px; cursor: pointer; font-weight: 500; transition: 0.2s;}
+        .btn-batal:hover { background: #dc2626; }
+        
+        #status-msg { margin-top: 15px; font-weight: 500; color: #059669; font-size: 14px;}
+        .status-jadual { margin-bottom: 20px; font-size: 13px; font-weight: 500; color: #475569; background: #f8fafc; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0; display: none; text-align: left;}
+        
+        .jadual-cat-group { display: none; }
+        .jadual-cat-group.active { display: block; animation: fadeIn 0.3s ease; }
+
+        @media (max-width: 768px) { 
+            body { padding: 0; background: #ffffff;}
+            .container { padding: 20px; border-radius: 0; box-shadow: none; border: none;}
+            .logo-usm { max-height: 60px; }
+            .logo-math { max-height: 90px; }
+            .form-grid { grid-template-columns: 1fr; gap: 16px;} 
+            .lang-switch { position: relative; justify-content: flex-end; margin-bottom: 15px; top: 0; right: 0; border: none; background: transparent; padding: 0;} 
+            .tabs { overflow-x: auto; white-space: nowrap; padding-bottom: 2px; }
+            .tabs button { flex: 1; text-align: center; padding: 10px 12px;}
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <div class="lang-switch">
+            <button id="btn-ms" class="active-lang" onclick="changeLang('ms')">BM</button>
+            <button id="btn-en" onclick="changeLang('en')">EN</button>
+        </div>
+
+        <!-- RUANGAN LOGO -->
+        <div class="logo-container">
+            <img src="usm-apex-logo.png" alt="Logo USM APEX" class="logo-usm">
+            <img src="math-usm-logo.png" alt="Logo Math@USM" class="logo-math">
+        </div>
+
+        <h1 class="header-title" data-i18n="title">Sistem Tempahan Bilik PPSM</h1>
+
+        <div class="tabs">
+            <button id="btnTab1" class="active-tab" onclick="openTab('borangTab', this)" data-i18n="tab_book">Borang Tempahan</button>
+            <button id="btnTab3" onclick="openTab('senaraiTab', this)" data-i18n="tab_list">Senarai Rekod</button>
+            <button id="btnTab2" onclick="openTab('jadualTab', this)" data-i18n="tab_sch">Papar Jadual</button>
+        </div>
+
+        <!-- TAB 1: BORANG -->
+        <div id="borangTab" class="tab-content active">
+            <h2 data-i18n="form_title">Butiran Tempahan Baru</h2>
+            <form id="bookingForm">
+                
+                <div class="form-group full-width">
+                    <label class="main-label" data-i18n="lbl_room">Pilih Kategori & Bilik</label>
+                    
+                    <div class="sub-tabs">
+                        <button type="button" class="sub-btn active" onclick="switchRoomTab('cat-tut', this)" data-i18n="cat_tut">Bilik Tutorial</button>
+                        <button type="button" class="sub-btn" onclick="switchRoomTab('cat-lab', this)" data-i18n="cat_lab">Makmal Komputer (Terhad)</button>
+                        <button type="button" class="sub-btn" onclick="switchRoomTab('cat-fac', this)" data-i18n="cat_fac">Bilik Kemudahan (Terhad)</button>
+                    </div>
+
+                    <div id="cat-tut" class="room-options active">
+                        <label class="room-card"><input type="radio" name="bilik" value="Bilik Tutorial 102"> <span>Bilik Tutorial 102</span></label>
+                        <label class="room-card"><input type="radio" name="bilik" value="Bilik Tutorial 105"> <span>Bilik Tutorial 105</span></label>
+                        <label class="room-card"><input type="radio" name="bilik" value="Bilik Tutorial 106"> <span>Bilik Tutorial 106</span></label>
+                    </div>
+
+                    <div id="cat-lab" class="room-options">
+                        <div class="admin-note" data-i18n="admin_note">Nota: Tempahan bagi kategori ini memerlukan pengesahan Kata Laluan Pentadbir (Admin).</div>
+                        <label class="room-card"><input type="radio" name="bilik" value="Makmal Komputer 1"> <span>Makmal Komputer 1 (Lab 1)</span></label>
+                        <label class="room-card"><input type="radio" name="bilik" value="Makmal Komputer 2"> <span>Makmal Komputer 2 (Lab 2)</span></label>
+                        <label class="room-card"><input type="radio" name="bilik" value="Makmal Komputer 3"> <span>Makmal Komputer 3 (Lab 3)</span></label>
+                    </div>
+
+                    <div id="cat-fac" class="room-options">
+                        <div class="admin-note" data-i18n="admin_note">Nota: Tempahan bagi kategori ini memerlukan pengesahan Kata Laluan Pentadbir (Admin).</div>
+                        <label class="room-card"><input type="radio" name="bilik" value="Bilik Seminar 107"> <span>Bilik Seminar 107</span></label>
+                        <label class="room-card"><input type="radio" name="bilik" value="Bilik The Space"> <span>Bilik The Space</span></label>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label class="main-label" data-i18n="lbl_type">Jenis Tempahan</label>
+                        <div class="radio-group">
+                            <label><input type="radio" id="jenisSemester" name="jenis" value="Semester" checked onchange="toggleDate()"> <span data-i18n="opt_sem">Semester (14 Minggu)</span></label>
+                            <label><input type="radio" id="jenisAdhoc" name="jenis" value="Ad-Hoc" onchange="toggleDate()"> <span data-i18n="opt_adhoc">Ad-Hoc (Tarikh Tertentu)</span></label>
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="dateGroup" style="display: none;">
+                        <label class="main-label" data-i18n="lbl_date">Tarikh Pilihan</label>
+                        <input type="date" id="tarikh" class="input-large" onchange="syncHari()">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="main-label" data-i18n="lbl_day">Hari</label>
+                        <select id="hari" class="input-large" required>
+                            <option value="" disabled selected data-i18n="opt_day">-- Pilih Hari --</option>
+                            <option value="Isnin" data-i18n="day_mon">Isnin</option>
+                            <option value="Selasa" data-i18n="day_tue">Selasa</option>
+                            <option value="Rabu" data-i18n="day_wed">Rabu</option>
+                            <option value="Khamis" data-i18n="day_thu">Khamis</option>
+                            <option value="Jumaat" data-i18n="day_fri">Jumaat</option>
+                            <option value="Sabtu" data-i18n="day_sat">Sabtu</option>
+                            <option value="Ahad" data-i18n="day_sun">Ahad</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="main-label" data-i18n="lbl_start">Masa Mula</label>
+                        <select id="masaMula" class="input-large" required>
+                            <option value="" disabled selected data-i18n="opt_start">-- Pilih Masa --</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="main-label" data-i18n="lbl_end">Masa Tamat</label>
+                        <select id="masaTamat" class="input-large" required>
+                            <option value="" disabled selected data-i18n="opt_end">-- Pilih Masa --</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label class="main-label" data-i18n="lbl_name">Nama Penempah / Tujuan Tempahan</label>
+                        <input type="text" id="nama" class="input-font-only" required placeholder="Contoh: MAT111 - Pensyarah A" data-placeholder-ms="Contoh: MAT111 - Pensyarah A" data-placeholder-en="Example: MAT111 - Lecturer A">
+                    </div>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <button type="button" class="submit-btn" id="btn-simpan" onclick="simpanTempahan()" data-i18n="btn_save">Simpan Tempahan</button>
+                    <div id="status-msg"></div>
+                </div>
+            </form>
+        </div>
+
+        <!-- TAB 2: SENARAI TEMPAHAN -->
+        <div id="senaraiTab" class="tab-content">
+            <h2 data-i18n="list_title">Senarai Rekod Tempahan</h2>
+            <div id="status-senarai" class="status-jadual" data-i18n="status_load">Memuat turun data sistem...</div>
+            <div class="table-responsive">
+                <table id="senarai-table">
+                    <thead>
+                        <tr>
+                            <th data-i18n="col_room">Bilik</th>
+                            <th data-i18n="col_name">Penempah</th>
+                            <th data-i18n="col_type">Kategori</th>
+                            <th data-i18n="col_datetime">Tarikh & Masa</th>
+                            <th data-i18n="col_action">Tindakan</th>
+                        </tr>
+                    </thead>
+                    <tbody id="senarai-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB 3: JADUAL (Papar Sahaja) -->
+        <div id="jadualTab" class="tab-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; margin-bottom: 24px; padding-bottom: 12px;">
+                <h2 style="border:none; padding:0; margin:0;" data-i18n="sch_title">Jadual Penggunaan Bilik</h2>
+                <button class="print-btn" onclick="exportHTMLToWord()" data-i18n="btn_print">Cetak (MS Word)</button>
+            </div>
+            
+            <div class="sub-tabs">
+                <button type="button" class="j-sub-btn active" onclick="switchJadualTab('j-cat-tut', this)">Bilik Tutorial</button>
+                <button type="button" class="j-sub-btn" onclick="switchJadualTab('j-cat-lab', this)">Makmal Komputer</button>
+                <button type="button" class="j-sub-btn" onclick="switchJadualTab('j-cat-fac', this)">Bilik Kemudahan</button>
+            </div>
+
+            <div id="status-jadual" class="status-jadual" data-i18n="status_load">Memuat turun jadual sistem...</div>
+            
+            <div id="j-cat-tut" class="jadual-cat-group active"></div>
+            <div id="j-cat-lab" class="jadual-cat-group"></div>
+            <div id="j-cat-fac" class="jadual-cat-group"></div>
+            
+        </div>
+    </div>
+
+    <!-- SKRIP EMAILJS (Mesti diletak sebelum modul Firebase) -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script type="text/javascript">
+        (function() {
+            // MASUKKAN PUBLIC KEY EMAILJS ANDA DI SINI
+            emailjs.init("Pl8KJKDGg7GZu15hv"); 
+        })();
+    </script>
+
+    <!-- PENGHUBUNG FIREBASE -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // ==========================================
+        // 1. TUKAR MAKLUMAT FIREBASE ANDA DI SINI
+        // ==========================================
+        const firebaseConfig = {
+  apiKey: "AIzaSyD7PaP_TGuZPL9gRIiQ7aLD6m9o4GVTumo",
+  authDomain: "bookingppsm.firebaseapp.com",
+  projectId: "bookingppsm",
+  storageBucket: "bookingppsm.firebasestorage.app",
+  messagingSenderId: "789367048782",
+  appId: "1:789367048782:web:c06ae914286d223817111f"
+};
+
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // ==========================================
+        // 2. TETAPAN KATA LALUAN & PENERIMA EMEL
+        // ==========================================
+        const KATA_LALUAN_ADMIN = 'admin123'; 
+        const EMAIL_ADMIN_1 = "hazimanm@usm.my"; 
+        const EMAIL_ADMIN_2 = "hartini@usm.my";     
+
+        let tempahanList = [];
+        let currentLang = 'ms';
+        
+        const hariList = ["Isnin", "Selasa", "Rabu", "Khamis", "Jumaat", "Sabtu", "Ahad"];
+        const waktuList = [];
+
+        const bilikKategori = {
+            'tut': ["Bilik Tutorial 102", "Bilik Tutorial 105", "Bilik Tutorial 106"],
+            'lab': ["Makmal Komputer 1", "Makmal Komputer 2", "Makmal Komputer 3"],
+            'fac': ["Bilik Seminar 107", "Bilik The Space"]
+        };
+
+        const langDict = {
+            'ms': {
+                'title': 'Sistem Tempahan Bilik PPSM',
+                'tab_book': 'Borang Tempahan', 'tab_sch': 'Papar Jadual', 'tab_list': 'Senarai Rekod',
+                'form_title': 'Butiran Tempahan Baru',
+                'lbl_room': 'Pilih Kategori & Bilik',
+                'cat_tut': 'Bilik Tutorial', 'cat_lab': 'Makmal Komputer (Terhad)', 'cat_fac': 'Bilik Kemudahan (Terhad)',
+                'admin_note': 'Nota: Tempahan bagi kategori ini memerlukan pengesahan Kata Laluan Pentadbir (Admin).',
+                'lbl_type': 'Jenis Tempahan', 'opt_sem': 'Semester (14 Minggu)', 'opt_adhoc': 'Ad-Hoc (Tarikh Tertentu)',
+                'lbl_date': 'Tarikh Pilihan', 'lbl_day': 'Hari', 'opt_day': '-- Pilih Hari --',
+                'day_mon': 'Isnin', 'day_tue': 'Selasa', 'day_wed': 'Rabu', 'day_thu': 'Khamis', 'day_fri': 'Jumaat', 'day_sat': 'Sabtu', 'day_sun': 'Ahad',
+                'lbl_start': 'Masa Mula', 'opt_start': '-- Pilih Masa --',
+                'lbl_end': 'Masa Tamat', 'opt_end': '-- Pilih Masa --',
+                'lbl_name': 'Nama Penempah / Tujuan Tempahan',
+                'btn_save': 'Simpan Data Tempahan', 'btn_saving': 'Menyimpan...', 'msg_saving': 'Sistem sedang memproses rekod...',
+                'sch_title': 'Jadual Penggunaan Bilik', 'btn_print': 'Cetak (MS Word)',
+                'list_title': 'Senarai Rekod Tempahan',
+                'col_room': 'Bilik', 'col_name': 'Penempah', 'col_type': 'Kategori', 'col_datetime': 'Tarikh & Masa', 'col_action': 'Tindakan',
+                'status_load': 'Sistem sedang memuat turun data terkini...', 'status_fail': 'Gagal menyambung ke pangkalan data. Sila semak sambungan internet.',
+                'th_day_time': 'Hari / Masa', 'txt_cancel': 'Batal', 'txt_sem_badge': 'Semester',
+                'alert_room': 'Sila buat pilihan bilik.', 'alert_date': 'Sila tetapkan tarikh.', 'alert_day': 'Sila pilih hari.',
+                'alert_time': 'Sila tetapkan masa mula dan masa tamat.', 'alert_logic': 'Ralat: Masa tamat mestilah lebih lewat daripada masa mula.',
+                'alert_name': 'Sila masukkan nama penempah.', 'alert_overlap': 'Ralat Tempahan: Bilik ini telah ditempah pada tarikh dan slot masa tersebut.',
+                'alert_success': 'Selesai: Tempahan berjaya direkodkan ke dalam sistem dan emel notifikasi telah dihantar.', 'alert_err': 'Ralat sistem berlaku. Sila hubungi pentadbir.',
+                'prompt_admin_book': 'Pengesahan diperlukan. Sila masukkan Kata Laluan Pentadbir (Admin):',
+                'alert_wrong_pass': 'Akses Ditolak: Kata laluan tidak sah.',
+                'prompt_pass': 'Pengesahan diperlukan untuk memadam rekod. Masukkan Kata Laluan Pentadbir (Admin):', 'msg_delete': 'Sistem sedang memadam rekod...',
+                'del_success': 'Rekod telah berjaya dipadam.', 'del_fail': 'Akses Ditolak: Kata laluan tidak sah.'
+            },
+            'en': {
+                'title': 'PPSM Room Booking System',
+                'tab_book': 'Booking Form', 'tab_sch': 'View Schedule', 'tab_list': 'Booking Records',
+                'form_title': 'New Booking Details',
+                'lbl_room': 'Select Category & Room',
+                'cat_tut': 'Tutorial Room', 'cat_lab': 'Computer Lab (Restricted)', 'cat_fac': 'Facility Room (Restricted)',
+                'admin_note': 'Note: Booking this category requires Administrator Password verification.',
+                'lbl_type': 'Booking Type', 'opt_sem': 'Semester (14 Weeks)', 'opt_adhoc': 'Ad-Hoc (Specific Date)',
+                'lbl_date': 'Select Date', 'lbl_day': 'Day', 'opt_day': '-- Select Day --',
+                'day_mon': 'Monday', 'day_tue': 'Tuesday', 'day_wed': 'Wednesday', 'day_thu': 'Thursday', 'day_fri': 'Friday', 'day_sat': 'Saturday', 'day_sun': 'Sunday',
+                'lbl_start': 'Start Time', 'opt_start': '-- Select Time --',
+                'lbl_end': 'End Time', 'opt_end': '-- Select Time --',
+                'lbl_name': 'Booker Name / Purpose',
+                'btn_save': 'Submit Booking Data', 'btn_saving': 'Processing...', 'msg_saving': 'System is processing the record...',
+                'sch_title': 'Room Utilization Schedule', 'btn_print': 'Print (MS Word)',
+                'list_title': 'Booking Records Log',
+                'col_room': 'Room', 'col_name': 'Booker', 'col_type': 'Category', 'col_datetime': 'Date & Time', 'col_action': 'Action',
+                'status_load': 'System is fetching the latest data...', 'status_fail': 'Database connection failed. Please check internet connection.',
+                'th_day_time': 'Day / Time', 'txt_cancel': 'Revoke', 'txt_sem_badge': 'Semester',
+                'alert_room': 'Please select a room.', 'alert_date': 'Please define a date.', 'alert_day': 'Please select a day.',
+                'alert_time': 'Please set the start and end time.', 'alert_logic': 'Error: End time must be later than start time.',
+                'alert_name': 'Please enter the booker name.', 'alert_overlap': 'Booking Conflict: The room is already booked during the selected timeframe.',
+                'alert_success': 'Success: Booking has been recorded in the system and notification email sent.', 'alert_err': 'System error occurred. Please contact the administrator.',
+                'prompt_admin_book': 'Verification required. Please enter Administrator Password:',
+                'alert_wrong_pass': 'Access Denied: Invalid password.',
+                'prompt_pass': 'Verification required to delete record. Enter Administrator Password:', 'msg_delete': 'System is deleting the record...',
+                'del_success': 'Record successfully deleted.', 'del_fail': 'Access Denied: Invalid password.'
+            }
+        };
+
+        function format12Hour(hour) { return hour === 12 ? "12:00 PM" : hour > 12 ? (hour - 12) + ":00 PM" : hour + ":00 AM"; }
+        for(let i=8; i<=21; i++) { waktuList.push({ valMula: i, valTamat: i + 1, labelMula: format12Hour(i), labelTamat: format12Hour(i + 1), labelSlot: format12Hour(i) + " - " + format12Hour(i + 1) }); }
+
+        window.onload = function() {
+            let mulaSelect = document.getElementById("masaMula");
+            let tamatSelect = document.getElementById("masaTamat");
+            waktuList.forEach(waktu => mulaSelect.add(new Option(waktu.labelMula, waktu.valMula)));
+            for(let i=9; i<=22; i++) tamatSelect.add(new Option(format12Hour(i), i));
+            window.muatTurunData();
+        };
+
+        window.changeLang = function(lang) {
+            currentLang = lang;
+            document.getElementById('btn-ms').classList.remove('active-lang');
+            document.getElementById('btn-en').classList.remove('active-lang');
+            document.getElementById('btn-' + lang).classList.add('active-lang');
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                let key = el.getAttribute('data-i18n');
+                if (langDict[lang][key]) el.innerHTML = langDict[lang][key];
+            });
+            let inputNama = document.getElementById('nama');
+            inputNama.placeholder = inputNama.getAttribute('data-placeholder-' + lang);
+            if(tempahanList.length > 0) {
+                renderTable();
+                renderSenarai();
+            }
+        };
+
+        window.openTab = function(tabId, btnElement) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tabs button').forEach(btn => btn.classList.remove('active-tab'));
+            document.getElementById(tabId).classList.add('active');
+            btnElement.classList.add('active-tab');
+            if (tabId === 'jadualTab' || tabId === 'senaraiTab') window.muatTurunData();
+        };
+
+        window.switchRoomTab = function(tabId, btnElement) {
+            document.querySelectorAll('.room-options').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.sub-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            btnElement.classList.add('active');
+            let radios = document.querySelectorAll('input[name="bilik"]');
+            radios.forEach(r => r.checked = false);
+        };
+
+        window.switchJadualTab = function(tabId, btnElement) {
+            document.querySelectorAll('.jadual-cat-group').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.j-sub-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            btnElement.classList.add('active');
+        };
+
+        window.toggleDate = function() {
+            let adhoc = document.getElementById("jenisAdhoc").checked;
+            document.getElementById("dateGroup").style.display = adhoc ? "block" : "none";
+            let hariDropdown = document.getElementById("hari");
+            if(adhoc) { hariDropdown.disabled = true; window.syncHari(); } 
+            else { hariDropdown.disabled = false; }
+        };
+
+        window.syncHari = function() {
+            let tarikhVal = document.getElementById("tarikh").value;
+            if(tarikhVal) {
+                let d = new Date(tarikhVal);
+                let hariMalay = ["Ahad", "Isnin", "Selasa", "Rabu", "Khamis", "Jumaat", "Sabtu"];
+                document.getElementById("hari").value = hariMalay[d.getDay()];
+            }
+        };
+
+        window.simpanTempahan = async function() {
+            let bilikObj = document.querySelector('input[name="bilik"]:checked');
+            let bilik = bilikObj ? bilikObj.value : "";
+            
+            let jenis = document.querySelector('input[name="jenis"]:checked').value;
+            let tarikh = document.getElementById("tarikh").value;
+            let hari = document.getElementById("hari").value;
+            let masaMula = document.getElementById("masaMula").value;
+            let masaTamat = document.getElementById("masaTamat").value;
+            let nama = document.getElementById("nama").value;
+
+            let trans = langDict[currentLang];
+            
+            if(!bilik) return alert(trans.alert_room);
+            if(jenis === "Ad-Hoc" && !tarikh) return alert(trans.alert_date);
+            if(!hari) return alert(trans.alert_day);
+            if(!masaMula || !masaTamat) return alert(trans.alert_time);
+            if(parseInt(masaMula) >= parseInt(masaTamat)) return alert(trans.alert_logic);
+            if(!nama) return alert(trans.alert_name);
+
+            let perlukanPassword = bilikKategori['lab'].includes(bilik) || bilikKategori['fac'].includes(bilik);
+            
+            if (perlukanPassword) {
+                let password = prompt(trans.prompt_admin_book);
+                if (password === null) return; 
+                
+                if (password !== KATA_LALUAN_ADMIN) {
+                    alert(trans.alert_wrong_pass);
+                    return;
+                }
+            }
+
+            let isOverlap = tempahanList.some(t => {
+                if (t.bilik === bilik && t.hari === hari) {
+                    let timeClash = (parseInt(masaMula) < parseInt(t.masaTamat)) && (parseInt(masaTamat) > parseInt(t.masaMula));
+                    if (timeClash) {
+                        if (jenis === "Semester" || t.jenis === "Semester") return true; 
+                        else if (jenis === "Ad-Hoc" && t.jenis === "Ad-Hoc") { return (t.tarikh === tarikh); }
+                    }
+                } return false;
+            });
+
+            if (isOverlap) { alert(trans.alert_overlap); return; }
+
+            let data = { bilik, jenis, tarikh, hari, masaMula, masaTamat, nama, timestamp: new Date() };
+            let btn = document.getElementById("btn-simpan");
+            let msg = document.getElementById("status-msg");
+            
+            btn.disabled = true; btn.innerText = trans.btn_saving; msg.innerText = trans.msg_saving;
+
+            try {
+                await addDoc(collection(db, "tempahan"), data);
+                
+                let formatMula = format12Hour(masaMula);
+                let formatTamat = format12Hour(masaTamat);
+                let butiranTarikh = jenis === "Ad-Hoc" ? tarikh : "Semester (14 Minggu)";
+                
+                let templateParams = {
+                    to_email: `${EMAIL_ADMIN_1}, ${EMAIL_ADMIN_2}`,
+                    bilik: bilik,
+                    nama: nama,
+                    jenis: jenis,
+                    tarikh: butiranTarikh,
+                    hari: hari,
+                    masa: `${formatMula} - ${formatTamat}`
+                };
+                
+                // MASUKKAN SERVICE ID DAN TEMPLATE ID EMAILJS ANDA DI SINI
+                emailjs.send("service_vsjo5zg", "template_ba210rp", templateParams)
+                    .then(function(response) {
+                        console.log("Notifikasi emel disahkan", response.status, response.text);
+                    }, function(error) {
+                        console.error("Notifikasi emel gagal", error);
+                    });
+
+                alert(trans.alert_success);
+                document.getElementById("bookingForm").reset();
+                window.toggleDate(); btn.disabled = false; btn.innerText = trans.btn_save; msg.innerText = ""; 
+                window.muatTurunData();
+            } catch (error) {
+                console.error("Error adding document: ", error);
+                alert(trans.alert_err); btn.disabled = false; btn.innerText = trans.btn_save; msg.innerText = "";
+            }
+        };
+
+        window.muatTurunData = async function() {
+            let trans = langDict[currentLang];
+            let status1 = document.getElementById("status-jadual");
+            let status2 = document.getElementById("status-senarai");
+            
+            status1.innerText = trans.status_load; status1.style.display = "block";
+            status2.innerText = trans.status_load; status2.style.display = "block";
+            
+            try {
+                const querySnapshot = await getDocs(collection(db, "tempahan"));
+                tempahanList = [];
+                querySnapshot.forEach((doc) => {
+                    let d = doc.data();
+                    d.id = doc.id; 
+                    tempahanList.push(d);
+                });
+                renderTable(); 
+                renderSenarai(); 
+                status1.style.display = "none";
+                status2.style.display = "none";
+            } catch (error) {
+                console.error("Error getting documents: ", error);
+                status1.innerText = trans.status_fail; status1.style.color = "#b91c1c";
+                status2.innerText = trans.status_fail; status2.style.color = "#b91c1c";
+            }
+        };
+
+        window.batalTempahan = async function(docId) {
+            let trans = langDict[currentLang];
+            let password = prompt(trans.prompt_pass);
+            if (!password) return; 
+            
+            if (password !== KATA_LALUAN_ADMIN) {
+                alert(trans.del_fail);
+                return;
+            }
+
+            let status = document.getElementById("status-senarai");
+            status.innerText = trans.msg_delete;
+            status.style.display = "block"; status.style.color = "#0f172a";
+
+            try {
+                await deleteDoc(doc(db, "tempahan", docId));
+                alert(trans.del_success); 
+                window.muatTurunData();
+            } catch (error) {
+                console.error("Error deleting document: ", error);
+                alert(trans.alert_err); status.style.display = "none";
+            }
+        };
+
+        const mapHari = { 'Isnin': 'day_mon', 'Selasa': 'day_tue', 'Rabu': 'day_wed', 'Khamis': 'day_thu', 'Jumaat': 'day_fri', 'Sabtu': 'day_sat', 'Ahad': 'day_sun' };
+
+        function renderTable() {
+            let trans = langDict[currentLang];
+            
+            for (const [katKey, senaraiBilik] of Object.entries(bilikKategori)) {
+                let container = document.getElementById("j-cat-" + katKey);
+                let html = "";
+                
+                senaraiBilik.forEach(bilik => {
+                    html += `<div class="room-title">${bilik}</div><div class="table-responsive"><table style="min-width:1400px;"><thead><tr><th style="width: 100px;">${trans.th_day_time}</th>`;
+                    waktuList.forEach(waktu => html += `<th>${waktu.labelSlot}</th>`);
+                    html += `</tr></thead><tbody>`;
+
+                    hariList.forEach(h => {
+                        let labelHari = trans[mapHari[h]];
+                        html += `<tr><td>${labelHari}</td>`;
+                        
+                        let skipHours = 0; 
+                        
+                        for (let i = 0; i < waktuList.length; i++) {
+                            if (skipHours > 0) {
+                                skipHours--;
+                                continue;
+                            }
+                            
+                            let waktu = waktuList[i];
+                            let slotInt = waktu.valMula;
+                            
+                            let tempahanSemasa = tempahanList.filter(t => 
+                                t.bilik === bilik && t.hari === h && 
+                                parseInt(t.masaMula) <= slotInt && parseInt(t.masaTamat) > slotInt
+                            );
+                            
+                            if (tempahanSemasa.length > 0) {
+                                let maxTamat = Math.max(...tempahanSemasa.map(t => parseInt(t.masaTamat)));
+                                let maxValidTamat = maxTamat > 22 ? 22 : maxTamat; 
+                                let duration = maxValidTamat - slotInt;
+                                
+                                html += `<td colspan="${duration}" style="padding: 0; background-color:#ffffff;">`;
+                                
+                                tempahanSemasa.forEach(t => {
+                                    let tarikhTeks = t.tarikh ? t.tarikh : "";
+                                    if(tarikhTeks) { let parts = tarikhTeks.split('-'); tarikhTeks = `${parts[2]}/${parts[1]}/${parts[0]}`; }
+                                    
+                                    let detail = t.jenis === "Ad-Hoc" ? `<br><small style="color:#475569;">${tarikhTeks}</small>` : `<br><small style="color:#475569;">${trans.txt_sem_badge}</small>`;
+                                    html += `<div class="booking-slot"><strong>${t.nama}</strong>${detail}</div>`;
+                                });
+                                
+                                html += `</td>`;
+                                skipHours = duration - 1;
+                            } else {
+                                html += `<td></td>`;
+                            }
+                        }
+                        
+                        html += `</tr>`;
+                    });
+                    html += `</tbody></table></div>`;
+                });
+                
+                container.innerHTML = html;
+            }
+        }
+
+        function renderSenarai() {
+            let tbody = document.getElementById("senarai-body");
+            let trans = langDict[currentLang];
+            let html = "";
+
+            if(tempahanList.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#64748b; padding:30px;">Tiada rekod tempahan dijumpai.</td></tr>`;
+                return;
+            }
+
+            // Susun array supaya yang terbaru di atas jika perlu, di sini kita biarkan susunan default (biasanya ikut urutan masuk db)
+            tempahanList.forEach(t => {
+                let mula = format12Hour(t.masaMula);
+                let tamat = format12Hour(t.masaTamat);
+                let tarikhText = "-";
+                
+                if (t.tarikh) {
+                    let p = t.tarikh.split('-'); 
+                    tarikhText = `${p[2]}/${p[1]}/${p[0]}`;
+                }
+
+                let hariLocal = trans[mapHari[t.hari]];
+                let dateTimeTeks = t.jenis === 'Ad-Hoc' 
+                    ? `<strong>${tarikhText}</strong> (${hariLocal})<br><span style="color:#475569; font-size:12px;">${mula} - ${tamat}</span>` 
+                    : `<strong>${trans.txt_sem_badge}</strong> (${hariLocal})<br><span style="color:#475569; font-size:12px;">${mula} - ${tamat}</span>`;
+                
+                let jenisTeks = t.jenis === 'Ad-Hoc' ? 'Ad-Hoc' : trans.txt_sem_badge;
+                
+                // Tambah style tag badge untuk jenis tempahan
+                let badgeStyle = t.jenis === 'Ad-Hoc' ? 'background:#fef3c7; color:#92400e; padding:4px 8px; border-radius:4px; font-size:12px;' : 'background:#e0e7ff; color:#3730a3; padding:4px 8px; border-radius:4px; font-size:12px;';
+
+                html += `<tr>
+                    <td><strong>${t.bilik}</strong></td>
+                    <td>${t.nama}</td>
+                    <td><span style="${badgeStyle}">${jenisTeks}</span></td>
+                    <td>${dateTimeTeks}</td>
+                    <td>
+                        <button class="btn-batal" onclick="batalTempahan('${t.id}')">${trans.txt_cancel}</button>
+                    </td>
+                </tr>`;
+            });
+            
+            tbody.innerHTML = html;
+        }
+
+        window.exportHTMLToWord = function() {
+            var preHtml = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Jadual Tempahan PPSM</title><style>@page WordSection1 {size: 841.9pt 595.3pt; mso-page-orientation: landscape; margin: 0.5in 0.5in 0.5in 0.5in;} div.WordSection1 {page: WordSection1;} table {width: 100%; border-collapse: collapse; margin-bottom: 30px; font-family: Arial, sans-serif;} th, td {border: 1px solid #000; padding: 6px; text-align: center; vertical-align: middle; font-size: 11px;} th {background-color: #f2f2f2; font-weight: bold;} .room-title {color: #000; margin-top: 30px; font-family: Arial; font-weight: bold; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 10px;} .booking-slot {font-size: 11px; margin: 2px; border: 1px solid #333; padding: 4px; background: #eef2f5; font-weight: bold; text-align: left;}</style></head><body><div class='WordSection1'>";
+            var postHtml = "</div></body></html>";
+            
+            var jadualContent = document.getElementById("j-cat-tut").innerHTML + 
+                                document.getElementById("j-cat-lab").innerHTML + 
+                                document.getElementById("j-cat-fac").innerHTML;
+            
+            var html = preHtml + jadualContent + postHtml;
+            var blob = new Blob(['\ufeff', html], { type: 'application/msword' });
+            var url = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(html);
+            
+            var downloadLink = document.createElement("a");
+            document.body.appendChild(downloadLink);
+            downloadLink.href = url; downloadLink.download = 'Jadual_Korporat_PPSM.doc'; downloadLink.click();
+            document.body.removeChild(downloadLink);
+        };
+    </script>
+</body>
+</html>
