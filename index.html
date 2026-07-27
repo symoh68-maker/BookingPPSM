@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Tempahan Bilik PPSM</title>
+    
+    <!-- Font Awesome untuk Ikon Profesional -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Font Google 'Inter' -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* GAYA ASAS & LATAR BELAKANG */
+        body { 
+            font-family: 'Inter', sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background-color: #f4f7fe; /* Warna latar aplikasi moden */
+            color: #1e293b; 
+            height: 100vh;
+            overflow: hidden; 
+        }
+        
+        .app-layout {
+            display: flex;
+            height: 100vh;
+            width: 100%;
+        }
+
+        /* SIDEBAR (NAVIGASI KIRI) */
+        .sidebar {
+            width: 300px;
+            background: #ffffff;
+            border-right: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            padding: 30px 24px;
+            box-sizing: border-box;
+            z-index: 10;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.03);
+            transition: all 0.3s ease;
+        }
+
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 25px;
+            padding-bottom: 25px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        .logo-usm { max-height: 50px; width: auto; object-fit: contain; }
+        .logo-math { max-height: 75px; width: auto; object-fit: contain; }
+
+        .header-title { text-align: center; margin-bottom: 40px; color: #0f172a; font-weight: 800; font-size: 20px; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.4; }
+        .header-title span { color: #4338ca; } /* Warna Indigo Premium */
+
+        /* TAB MENU SIDEBAR */
+        .tabs { display: flex; flex-direction: column; gap: 12px; }
+        .tabs button { 
+            background-color: transparent; 
+            color: #64748b; 
+            border: none; 
+            padding: 16px 20px; 
+            cursor: pointer; 
+            border-radius: 12px; 
+            font-size: 15px; 
+            font-weight: 600; 
+            text-align: left; 
+            transition: all 0.3s ease; 
+            display: flex; 
+            align-items: center; 
+            gap: 15px;
+            border: 1px solid transparent;
+        }
+        .tabs button i { font-size: 18px; width: 24px; text-align: center; transition: 0.3s;}
+        .tabs button:hover { background: #f8fafc; color: #0f172a; transform: translateX(5px); border-color: #e2e8f0;}
+        .tabs button.active-tab { 
+            background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%); 
+            color: #4338ca; 
+            box-shadow: inset 4px 0 0 #4f46e5, 0 4px 10px rgba(67, 56, 202, 0.05); 
+            border-color: #e0e7ff;
+            transform: translateX(5px);
+        }
+
+        /* KANDUNGAN UTAMA (KANAN) */
+        .main-content {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 40px 50px;
+            position: relative;
+            scroll-behavior: smooth;
+        }
+        
+        /* HEADER ATAS (BAHASA) */
+        .top-bar {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 20px;
+        }
+        .lang-switch { display: inline-flex; gap: 5px; background: #ffffff; padding: 6px; border-radius: 10px; border: 1px solid #e2e8f0; box-shadow: 0 2px 10px rgba(0,0,0,0.02);}
+        .lang-switch button { border: none; background: transparent; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 13px; color: #64748b; transition: 0.2s; }
+        .lang-switch button:hover { color: #0f172a; background: #f1f5f9; }
+        .lang-switch button.active-lang { background: #4f46e5; color: #ffffff; box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);}
+        
+        /* KAD KANDUNGAN UTAMA */
+        .tab-content { 
+            display: none; 
+            background: #ffffff; 
+            padding: 40px; 
+            border-radius: 24px; 
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04); 
+            border: 1px solid rgba(226, 232, 240, 0.8); 
+            animation: fadeSlideUp 0.4s ease forwards; 
+            max-width: 1050px; 
+            margin: 0 auto;
+        }
+        .active { display: block; }
+        @keyframes fadeSlideUp { 
+            from { opacity: 0; transform: translateY(20px);} 
+            to { opacity: 1; transform: translateY(0);} 
+        }
+        
+        h2 { margin-top: 0; color: #0f172a; border-bottom: 2px solid #f1f5f9; padding-bottom: 16px; margin-bottom: 30px; font-weight: 800; font-size: 22px; display: flex; align-items: center; gap: 12px;}
+        h2 i { color: #4f46e5; }
+        
+        /* SUB-TAB (Kategori Bilik) */
+        .sub-tabs { display: flex; gap: 12px; margin-bottom: 25px; flex-wrap: wrap; background: #f8fafc; padding: 8px; border-radius: 12px; border: 1px solid #e2e8f0;}
+        .sub-tabs button { flex: 1; background: transparent; border: none; padding: 12px 20px; border-radius: 8px; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 14px; cursor: pointer; color: #64748b; transition: all 0.2s;}
+        .sub-tabs button:hover { background: #e2e8f0; color: #0f172a; }
+        .sub-tabs button.active { background: #ffffff; color: #4338ca; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #cbd5e1;}
+        
+        /* PILIHAN BILIK (RADIO KAD MODEN) */
+        .room-options { display: none; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 35px;}
+        .room-options.active { display: grid; animation: fadeIn 0.3s ease;}
+        
+        .room-card { display: block; cursor: pointer; position: relative;}
+        .room-card input { position: absolute; opacity: 0; cursor: pointer; }
+        .room-card span { 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
+            padding: 24px 16px; background: #ffffff; border: 2px solid #e2e8f0; border-radius: 16px; 
+            text-align: center; font-weight: 600; color: #475569; transition: all 0.2s ease; font-size: 14px;
+        }
+        .room-card span i { font-size: 28px; color: #94a3b8; transition: 0.2s; }
+        .room-card:hover span { border-color: #94a3b8; transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.04);}
+        .room-card:hover span i { color: #64748b; }
+        .room-card input:checked ~ span { 
+            background: #eef2ff; border-color: #4f46e5; color: #4338ca; 
+            box-shadow: 0 10px 25px rgba(79, 70, 229, 0.15); transform: translateY(-3px);
+        }
+        .room-card input:checked ~ span i { color: #4f46e5; }
+
+        .admin-note { grid-column: 1 / -1; color: #b91c1c; font-size: 13px; font-weight: 600; margin-bottom: 10px; padding: 14px 18px; background: #fef2f2; border-radius: 12px; border: 1px solid #fca5a5; display: flex; align-items: center; gap: 12px;}
+
+        /* BORANG */
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+        .full-width { grid-column: 1 / -1; }
+        .form-group label.main-label { display: flex; align-items: center; gap: 8px; font-weight: 700; margin-bottom: 10px; font-size: 13px; color: #334155; text-transform: uppercase; letter-spacing: 0.5px;}
+        .form-group label.main-label i { color: #64748b; }
+        
+        .input-large, .input-font-only { width: 100%; padding: 14px 18px; font-size: 15px; font-family: 'Inter', sans-serif; box-sizing: border-box; border: 2px solid #e2e8f0; border-radius: 12px; background-color: #f8fafc; transition: all 0.2s ease; color: #0f172a; font-weight: 500;}
+        .input-large:focus, .input-font-only:focus { border-color: #4f46e5; background-color: #ffffff; outline: none; box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15); }
+        .input-large:disabled { background-color: #f1f5f9; color: #94a3b8; cursor: not-allowed; border-color: #e2e8f0; }
+        
+        .radio-group { display: flex; gap: 24px; padding: 12px 18px; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 12px;}
+        .radio-group label { display: flex; align-items: center; font-weight: 600; cursor: pointer; color: #334155; font-size: 14px;}
+        .radio-group input { margin-right: 10px; cursor: pointer; accent-color: #4f46e5; width: 18px; height: 18px;}
+        
+        /* BUTANG TINDAKAN */
+        button.submit-btn { 
+            background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%); 
+            color: #ffffff; padding: 16px 32px; border: none; border-radius: 12px; cursor: pointer; font-size: 15px; font-weight: 700; width: auto; min-width: 250px; margin-top: 25px; transition: all 0.3s ease; box-shadow: 0 10px 20px rgba(79, 70, 229, 0.3);
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        button.submit-btn:hover { transform: translateY(-3px); box-shadow: 0 15px 25px rgba(79, 70, 229, 0.4); }
+        button.submit-btn:disabled { background: #94a3b8; box-shadow: none; cursor: not-allowed; transform: none; }
+        
+        .print-btn { background: #334155; color: white; padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 10px rgba(51, 65, 85, 0.2);}
+        .print-btn:hover { background: #0f172a; transform: translateY(-2px); box-shadow: 0 6px 15px rgba(15, 23, 42, 0.3);}
+        
+        /* JADUAL & SENARAI */
+        .table-responsive { overflow-x: auto; margin-top: 15px; margin-bottom: 40px; border: 1px solid #e2e8f0; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.02);}
+        table { width: 100%; border-collapse: separate; border-spacing: 0; background: #ffffff; text-align: left; font-size: 13px;}
+        #senarai-table { min-width: 800px; } 
+        
+        th, td { border-bottom: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; padding: 16px; vertical-align: middle; }
+        th { background: #f8fafc; color: #475569; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; font-size: 12px; }
+        th:last-child, td:last-child { border-right: none; }
+        td:first-child { font-weight: 700; color: #0f172a; background-color: #f8fafc; }
+        tbody tr:hover td { background-color: #f8fafc; }
+        
+        .room-title { color: #0f172a; background: #f8fafc; padding: 16px 20px; border: 1px solid #e2e8f0; border-bottom: none; border-radius: 16px 16px 0 0; margin: 40px 0 0 0; font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 10px;}
+        .room-title i { color: #4338ca; }
+        
+        /* SLOT JADUAL */
+        .booking-slot { 
+            background: #eef2ff; border-left: 4px solid #4f46e5; font-size: 12px; padding: 12px; border-radius: 8px; margin: 4px; color: #3730a3; text-align: center; line-height: 1.5; border-right: 1px solid #c7d2fe; border-top: 1px solid #c7d2fe; border-bottom: 1px solid #c7d2fe; height: calc(100% - 8px); box-sizing: border-box; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            display: flex; flex-direction: column; justify-content: center;
+        }
+        .booking-slot strong { display: block; font-size: 13px; color: #312e81; margin-bottom: 4px; font-weight: 700;}
+        
+        .btn-batal { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; border-radius: 6px; font-size: 12px; padding: 8px 14px; cursor: pointer; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px;}
+        .btn-batal:hover { background: #ef4444; color: white; border-color: #ef4444; transform: scale(1.05);}
+        
+        .badge { padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;}
+        .badge-adhoc { background: #fef3c7; color: #92400e; border: 1px solid #fde68a;}
+        .badge-sem { background: #e0e7ff; color: #3730a3; border: 1px solid #c7d2fe;}
+
+        #status-msg { margin-top: 15px; font-weight: 600; color: #059669; font-size: 15px;}
+        .status-jadual { margin-bottom: 25px; font-size: 14px; font-weight: 600; color: #3b82f6; background: #eff6ff; padding: 16px; border-radius: 12px; border: 1px solid #bfdbfe; display: none; text-align: left; align-items: center; gap: 10px;}
+        
+        .jadual-cat-group { display: none; }
+        .jadual-cat-group.active { display: block; animation: fadeIn 0.4s ease; }
+
+        /* RESPONSIVE PINTAR */
+        @media (max-width: 1024px) {
+            .app-layout { flex-direction: column; height: auto; }
+            body { overflow: auto; }
+            .sidebar { width: 100%; border-right: none; border-bottom: 1px solid #e2e8f0; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); position: sticky; top: 0; z-index: 50;}
+            .tabs { flex-direction: row; overflow-x: auto; white-space: nowrap; padding-bottom: 5px; gap: 10px;}
+            .tabs button { flex: 0 0 auto; border-radius: 10px; padding: 12px 16px;}
+            .tabs button.active-tab { box-shadow: inset 0 -4px 0 #4f46e5; transform: translateY(-2px);}
+            .logo-container { flex-direction: row; justify-content: space-between; padding-bottom: 15px; margin-bottom: 15px; gap: 10px;}
+            .logo-usm { max-height: 40px; } .logo-math { max-height: 55px; }
+            .header-title { display: none; /* Sembunyikan tajuk besar di mobile supaya jimat ruang */ }
+            .main-content { padding: 20px 15px; }
+            .tab-content { padding: 25px 20px; border-radius: 16px;}
+            .form-grid { grid-template-columns: 1fr; gap: 20px;} 
+            .top-bar { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-layout">
+        
+        <!-- SIDEBAR (NAVIGASI KIRI) -->
+        <aside class="sidebar">
+            <div class="logo-container">
+                <img src="usm-apex-logo.png" alt="Logo USM APEX" class="logo-usm">
+                <img src="math-usm-logo.png" alt="Logo Math@USM" class="logo-math">
+            </div>
+
+            <h1 class="header-title" data-i18n="title">Sistem Tempahan<br><span>Bilik PPSM</span></h1>
+
+            <nav class="tabs">
+                <button id="btnTab1" class="active-tab" onclick="openTab('borangTab', this)">
+                    <i class="fa-solid fa-file-signature"></i> <span data-i18n="tab_book">Borang Tempahan</span>
+                </button>
+                <button id="btnTab3" onclick="openTab('senaraiTab', this)">
+                    <i class="fa-solid fa-list-check"></i> <span data-i18n="tab_list">Senarai Rekod</span>
+                </button>
+                <button id="btnTab2" onclick="openTab('jadualTab', this)">
+                    <i class="fa-regular fa-calendar-days"></i> <span data-i18n="tab_sch">Papar Jadual</span>
+                </button>
+            </nav>
+        </aside>
+
+        <!-- KANDUNGAN UTAMA (KANAN) -->
+        <main class="main-content">
+            
+            <div class="top-bar">
+                <div class="lang-switch">
+                    <button id="btn-ms" class="active-lang" onclick="changeLang('ms')">BM</button>
+                    <button id="btn-en" onclick="changeLang('en')">EN</button>
+                </div>
+            </div>
+
+            <!-- TAB 1: BORANG -->
+            <div id="borangTab" class="tab-content active">
+                <h2><i class="fa-solid fa-pen-to-square"></i> <span data-i18n="form_title">Butiran Tempahan Baru</span></h2>
+                <form id="bookingForm">
+                    
+                    <div class="form-group full-width">
+                        <label class="main-label"><i class="fa-solid fa-building"></i> <span data-i18n="lbl_room">Pilih Kategori & Bilik</span></label>
+                        
+                        <div class="sub-tabs">
+                            <button type="button" class="sub-btn active" onclick="switchRoomTab('cat-tut', this)" data-i18n="cat_tut">Bilik Tutorial</button>
+                            <button type="button" class="sub-btn" onclick="switchRoomTab('cat-lab', this)"><i class="fa-solid fa-lock" style="font-size:12px; margin-right:4px;"></i> <span data-i18n="cat_lab">Makmal Komputer</span></button>
+                            <button type="button" class="sub-btn" onclick="switchRoomTab('cat-fac', this)"><i class="fa-solid fa-lock" style="font-size:12px; margin-right:4px;"></i> <span data-i18n="cat_fac">Bilik Kemudahan</span></button>
+                        </div>
+
+                        <div id="cat-tut" class="room-options active">
+                            <label class="room-card">
+                                <input type="radio" name="bilik" value="Bilik Tutorial 102"> 
+                                <span><i class="fa-solid fa-chalkboard-user"></i> Bilik Tutorial 102</span>
+                            </label>
+                            <label class="room-card">
+                                <input type="radio" name="bilik" value="Bilik Tutorial 105"> 
+                                <span><i class="fa-solid fa-chalkboard-user"></i> Bilik Tutorial 105</span>
+                            </label>
+                            <label class="room-card">
+                                <input type="radio" name="bilik" value="Bilik Tutorial 106"> 
+                                <span><i class="fa-solid fa-chalkboard-user"></i> Bilik Tutorial 106</span>
+                            </label>
+                        </div>
+
+                        <div id="cat-lab" class="room-options">
+                            <div class="admin-note"><i class="fa-solid fa-circle-exclamation"></i> <span data-i18n="admin_note">Nota: Tempahan bagi kategori ini memerlukan pengesahan Kata Laluan Pentadbir (Admin).</span></div>
+                            <label class="room-card">
+                                <input type="radio" name="bilik" value="Makmal Komputer 1"> 
+                                <span><i class="fa-solid fa-computer"></i> Makmal Komputer 1</span>
+                            </label>
+                            <label class="room-card">
+                                <input type="radio" name="bilik" value="Makmal Komputer 2"> 
+                                <span><i class="fa-solid fa-computer"></i> Makmal Komputer 2</span>
+                            </label>
+                            <label class="room-card">
+                                <input type="radio" name="bilik" value="Makmal Komputer 3"> 
+                                <span><i class="fa-solid fa-computer"></i> Makmal Komputer 3</span>
+                            </label>
+                        </div>
+
+                        <div id="cat-fac" class="room-options">
+                            <div class="admin-note"><i class="fa-solid fa-circle-exclamation"></i> <span data-i18n="admin_note">Nota: Tempahan bagi kategori ini memerlukan pengesahan Kata Laluan Pentadbir (Admin).</span></div>
+                            <label class="room-card">
+                                <input type="radio" name="bilik" value="Bilik Seminar 107"> 
+                                <span><i class="fa-solid fa-users-rectangle"></i> Bilik Seminar 107</span>
+                            </label>
+                            <label class="room-card">
+                                <input type="radio" name="bilik" value="Bilik The Space"> 
+                                <span><i class="fa-solid fa-couch"></i> Bilik The Space</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label class="main-label"><i class="fa-solid fa-tag"></i> <span data-i18n="lbl_type">Jenis Tempahan</span></label>
+                            <div class="radio-group">
+                                <label><input type="radio" id="jenisSemester" name="jenis" value="Semester" checked onchange="toggleDate()"> <span data-i18n="opt_sem">Semester (14 Minggu)</span></label>
+                                <label><input type="radio" id="jenisAdhoc" name="jenis" value="Ad-Hoc" onchange="toggleDate()"> <span data-i18n="opt_adhoc">Ad-Hoc (Tarikh Tertentu)</span></label>
+                            </div>
+                        </div>
+
+                        <div class="form-group" id="dateGroup" style="display: none;">
+                            <label class="main-label"><i class="fa-solid fa-calendar-day"></i> <span data-i18n="lbl_date">Tarikh Pilihan</span></label>
+                            <input type="date" id="tarikh" class="input-large" onchange="syncHari()">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="main-label"><i class="fa-solid fa-calendar-week"></i> <span data-i18n="lbl_day">Hari</span></label>
+                            <select id="hari" class="input-large" required>
+                                <option value="" disabled selected data-i18n="opt_day">-- Pilih Hari --</option>
+                                <option value="Isnin" data-i18n="day_mon">Isnin</option>
+                                <option value="Selasa" data-i18n="day_tue">Selasa</option>
+                                <option value="Rabu" data-i18n="day_wed">Rabu</option>
+                                <option value="Khamis" data-i18n="day_thu">Khamis</option>
+                                <option value="Jumaat" data-i18n="day_fri">Jumaat</option>
+                                <option value="Sabtu" data-i18n="day_sat">Sabtu</option>
+                                <option value="Ahad" data-i18n="day_sun">Ahad</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="main-label"><i class="fa-solid fa-clock"></i> <span data-i18n="lbl_start">Masa Mula</span></label>
+                            <select id="masaMula" class="input-large" required>
+                                <option value="" disabled selected data-i18n="opt_start">-- Pilih Masa --</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="main-label"><i class="fa-solid fa-hourglass-end"></i> <span data-i18n="lbl_end">Masa Tamat</span></label>
+                            <select id="masaTamat" class="input-large" required>
+                                <option value="" disabled selected data-i18n="opt_end">-- Pilih Masa --</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label class="main-label"><i class="fa-solid fa-user-tie"></i> <span data-i18n="lbl_name">Nama Penempah / Tujuan Tempahan</span></label>
+                            <input type="text" id="nama" class="input-font-only" required placeholder="Contoh: MAT111 - Pensyarah A" data-placeholder-ms="Contoh: MAT111 - Pensyarah A" data-placeholder-en="Example: MAT111 - Lecturer A">
+                        </div>
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+                        <button type="button" class="submit-btn" id="btn-simpan" onclick="simpanTempahan()">
+                            <i class="fa-solid fa-cloud-arrow-up"></i> <span data-i18n="btn_save">Simpan Data Tempahan</span>
+                        </button>
+                        <div id="status-msg"></div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- TAB 2: SENARAI TEMPAHAN -->
+            <div id="senaraiTab" class="tab-content">
+                <h2><i class="fa-solid fa-clipboard-list"></i> <span data-i18n="list_title">Senarai Rekod Tempahan</span></h2>
+                <div id="status-senarai" class="status-jadual"><i class="fa-solid fa-circle-notch fa-spin"></i> <span data-i18n="status_load">Memuat turun data sistem...</span></div>
+                <div class="table-responsive">
+                    <table id="senarai-table">
+                        <thead>
+                            <tr>
+                                <th data-i18n="col_room">Bilik</th>
+                                <th data-i18n="col_name">Penempah</th>
+                                <th data-i18n="col_type">Kategori</th>
+                                <th data-i18n="col_datetime">Tarikh & Masa</th>
+                                <th data-i18n="col_action">Tindakan</th>
+                            </tr>
+                        </thead>
+                        <tbody id="senarai-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB 3: JADUAL (Papar Sahaja) -->
+            <div id="jadualTab" class="tab-content">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; margin-bottom: 24px; padding-bottom: 16px; flex-wrap: wrap; gap:15px;">
+                    <h2 style="border:none; padding:0; margin:0;"><i class="fa-solid fa-table-cells"></i> <span data-i18n="sch_title">Jadual Penggunaan Bilik</span></h2>
+                    <button class="print-btn" onclick="exportHTMLToWord()"><i class="fa-solid fa-print"></i> <span data-i18n="btn_print">Cetak (MS Word)</span></button>
+                </div>
+                
+                <div class="sub-tabs">
+                    <button type="button" class="j-sub-btn active" onclick="switchJadualTab('j-cat-tut', this)" data-i18n="cat_tut">Bilik Tutorial</button>
+                    <button type="button" class="j-sub-btn" onclick="switchJadualTab('j-cat-lab', this)" data-i18n="cat_lab">Makmal Komputer</button>
+                    <button type="button" class="j-sub-btn" onclick="switchJadualTab('j-cat-fac', this)" data-i18n="cat_fac">Bilik Kemudahan</button>
+                </div>
+
+                <div id="status-jadual" class="status-jadual"><i class="fa-solid fa-circle-notch fa-spin"></i> <span data-i18n="status_load">Memuat turun jadual sistem...</span></div>
+                
+                <div id="j-cat-tut" class="jadual-cat-group active"></div>
+                <div id="j-cat-lab" class="jadual-cat-group"></div>
+                <div id="j-cat-fac" class="jadual-cat-group"></div>
+                
+            </div>
+            
+        </main>
+    </div>
+
+    <!-- SKRIP EMAILJS -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script type="text/javascript">
+        (function() {
+            // MASUKKAN PUBLIC KEY EMAILJS ANDA DI SINI
+            emailjs.init("Pl8KJKDGg7GZu15hv"); 
+        })();
+    </script>
+
+    <!-- PENGHUBUNG FIREBASE -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // ==========================================
+        // 1. TUKAR MAKLUMAT FIREBASE ANDA DI SINI
+        // ==========================================
+       const firebaseConfig = {
+  apiKey: "AIzaSyD7PaP_TGuZPL9gRIiQ7aLD6m9o4GVTumo",
+  authDomain: "bookingppsm.firebaseapp.com",
+  projectId: "bookingppsm",
+  storageBucket: "bookingppsm.firebasestorage.app",
+  messagingSenderId: "789367048782",
+  appId: "1:789367048782:web:c06ae914286d223817111f"
+};
+
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // ==========================================
+        // 2. TETAPAN KATA LALUAN & PENERIMA EMEL
+        // ==========================================
+        const KATA_LALUAN_ADMIN = 'admin123'; 
+        const EMAIL_ADMIN_1 = "hazimanm@usm.my"; 
+        const EMAIL_ADMIN_2 = "hartini@usm.my";     
+
+        let tempahanList = [];
+        let currentLang = 'ms';
+        
+        const hariList = ["Isnin", "Selasa", "Rabu", "Khamis", "Jumaat", "Sabtu", "Ahad"];
+        const waktuList = [];
+
+        const bilikKategori = {
+            'tut': ["Bilik Tutorial 102", "Bilik Tutorial 105", "Bilik Tutorial 106"],
+            'lab': ["Makmal Komputer 1", "Makmal Komputer 2", "Makmal Komputer 3"],
+            'fac': ["Bilik Seminar 107", "Bilik The Space"]
+        };
+
+        const langDict = {
+            'ms': {
+                'title': 'Sistem Tempahan<br><span>Bilik PPSM</span>',
+                'tab_book': 'Borang Tempahan', 'tab_sch': 'Papar Jadual', 'tab_list': 'Senarai Rekod',
+                'form_title': 'Butiran Tempahan Baru',
+                'lbl_room': 'Pilih Kategori & Bilik',
+                'cat_tut': 'Bilik Tutorial', 'cat_lab': 'Makmal Komputer', 'cat_fac': 'Bilik Kemudahan',
+                'admin_note': 'Nota: Tempahan bagi kategori ini memerlukan pengesahan Kata Laluan Pentadbir (Admin).',
+                'lbl_type': 'Jenis Tempahan', 'opt_sem': 'Semester (14 Minggu)', 'opt_adhoc': 'Ad-Hoc (Tarikh Tertentu)',
+                'lbl_date': 'Tarikh Pilihan', 'lbl_day': 'Hari', 'opt_day': '-- Pilih Hari --',
+                'day_mon': 'Isnin', 'day_tue': 'Selasa', 'day_wed': 'Rabu', 'day_thu': 'Khamis', 'day_fri': 'Jumaat', 'day_sat': 'Sabtu', 'day_sun': 'Ahad',
+                'lbl_start': 'Masa Mula', 'opt_start': '-- Pilih Masa --',
+                'lbl_end': 'Masa Tamat', 'opt_end': '-- Pilih Masa --',
+                'lbl_name': 'Nama Penempah / Tujuan Tempahan',
+                'btn_save': 'Simpan Data Tempahan', 'btn_saving': 'Menyimpan...', 'msg_saving': 'Sistem sedang memproses rekod...',
+                'sch_title': 'Jadual Penggunaan Bilik', 'btn_print': 'Cetak (MS Word)',
+                'list_title': 'Senarai Rekod Tempahan',
+                'col_room': 'Bilik', 'col_name': 'Penempah', 'col_type': 'Kategori', 'col_datetime': 'Tarikh & Masa', 'col_action': 'Tindakan',
+                'status_load': 'Sistem sedang memuat turun data terkini...', 'status_fail': 'Gagal menyambung ke pangkalan data.',
+                'th_day_time': 'Hari / Masa', 'txt_cancel': 'Batal', 'txt_sem_badge': 'Semester',
+                'alert_room': 'Sila buat pilihan bilik.', 'alert_date': 'Sila tetapkan tarikh.', 'alert_day': 'Sila pilih hari.',
+                'alert_time': 'Sila tetapkan masa mula dan masa tamat.', 'alert_logic': 'Ralat: Masa tamat mestilah lebih lewat daripada masa mula.',
+                'alert_name': 'Sila masukkan nama penempah.', 'alert_overlap': 'Ralat Tempahan: Bilik ini telah ditempah pada tarikh dan slot masa tersebut.',
+                'alert_success': 'Selesai: Tempahan berjaya direkodkan dan emel notifikasi telah dihantar.', 'alert_err': 'Ralat sistem berlaku. Sila hubungi pentadbir.',
+                'prompt_admin_book': 'Pengesahan diperlukan. Sila masukkan Kata Laluan Pentadbir (Admin):',
+                'alert_wrong_pass': 'Akses Ditolak: Kata laluan tidak sah.',
+                'prompt_pass': 'Pengesahan diperlukan untuk memadam rekod. Masukkan Kata Laluan Pentadbir (Admin):', 'msg_delete': 'Sistem sedang memadam rekod...',
+                'del_success': 'Rekod telah berjaya dipadam.', 'del_fail': 'Akses Ditolak: Kata laluan tidak sah.'
+            },
+            'en': {
+                'title': 'PPSM Room<br><span>Booking System</span>',
+                'tab_book': 'Booking Form', 'tab_sch': 'View Schedule', 'tab_list': 'Booking Records',
+                'form_title': 'New Booking Details',
+                'lbl_room': 'Select Category & Room',
+                'cat_tut': 'Tutorial Room', 'cat_lab': 'Computer Lab', 'cat_fac': 'Facility Room',
+                'admin_note': 'Note: Booking this category requires Administrator Password verification.',
+                'lbl_type': 'Booking Type', 'opt_sem': 'Semester (14 Weeks)', 'opt_adhoc': 'Ad-Hoc (Specific Date)',
+                'lbl_date': 'Select Date', 'lbl_day': 'Day', 'opt_day': '-- Select Day --',
+                'day_mon': 'Monday', 'day_tue': 'Tuesday', 'day_wed': 'Wednesday', 'day_thu': 'Thursday', 'day_fri': 'Friday', 'day_sat': 'Saturday', 'day_sun': 'Sunday',
+                'lbl_start': 'Start Time', 'opt_start': '-- Select Time --',
+                'lbl_end': 'End Time', 'opt_end': '-- Select Time --',
+                'lbl_name': 'Booker Name / Purpose',
+                'btn_save': 'Submit Booking Data', 'btn_saving': 'Processing...', 'msg_saving': 'System is processing the record...',
+                'sch_title': 'Room Utilization Schedule', 'btn_print': 'Print (MS Word)',
+                'list_title': 'Booking Records Log',
+                'col_room': 'Room', 'col_name': 'Booker', 'col_type': 'Category', 'col_datetime': 'Date & Time', 'col_action': 'Action',
+                'status_load': 'System is fetching the latest data...', 'status_fail': 'Database connection failed.',
+                'th_day_time': 'Day / Time', 'txt_cancel': 'Revoke', 'txt_sem_badge': 'Semester',
+                'alert_room': 'Please select a room.', 'alert_date': 'Please define a date.', 'alert_day': 'Please select a day.',
+                'alert_time': 'Please set the start and end time.', 'alert_logic': 'Error: End time must be later than start time.',
+                'alert_name': 'Please enter the booker name.', 'alert_overlap': 'Booking Conflict: The room is already booked during the selected timeframe.',
+                'alert_success': 'Success: Booking has been recorded and notification email sent.', 'alert_err': 'System error occurred.',
+                'prompt_admin_book': 'Verification required. Please enter Administrator Password:',
+                'alert_wrong_pass': 'Access Denied: Invalid password.',
+                'prompt_pass': 'Verification required to delete record. Enter Administrator Password:', 'msg_delete': 'System is deleting the record...',
+                'del_success': 'Record successfully deleted.', 'del_fail': 'Access Denied: Invalid password.'
+            }
+        };
+
+        function format12Hour(hour) { return hour === 12 ? "12:00 PM" : hour > 12 ? (hour - 12) + ":00 PM" : hour + ":00 AM"; }
+        for(let i=8; i<=21; i++) { waktuList.push({ valMula: i, valTamat: i + 1, labelMula: format12Hour(i), labelTamat: format12Hour(i + 1), labelSlot: format12Hour(i) + " - " + format12Hour(i + 1) }); }
+
+        window.onload = function() {
+            let mulaSelect = document.getElementById("masaMula");
+            let tamatSelect = document.getElementById("masaTamat");
+            waktuList.forEach(waktu => mulaSelect.add(new Option(waktu.labelMula, waktu.valMula)));
+            for(let i=9; i<=22; i++) tamatSelect.add(new Option(format12Hour(i), i));
+            window.muatTurunData();
+        };
+
+        window.changeLang = function(lang) {
+            currentLang = lang;
+            document.getElementById('btn-ms').classList.remove('active-lang');
+            document.getElementById('btn-en').classList.remove('active-lang');
+            document.getElementById('btn-' + lang).classList.add('active-lang');
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                let key = el.getAttribute('data-i18n');
+                if (langDict[lang][key]) el.innerHTML = langDict[lang][key];
+            });
+            let inputNama = document.getElementById('nama');
+            inputNama.placeholder = inputNama.getAttribute('data-placeholder-' + lang);
+            if(tempahanList.length > 0) {
+                renderTable();
+                renderSenarai();
+            }
+        };
+
+        window.openTab = function(tabId, btnElement) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tabs button').forEach(btn => btn.classList.remove('active-tab'));
+            document.getElementById(tabId).classList.add('active');
+            btnElement.classList.add('active-tab');
+            if (tabId === 'jadualTab' || tabId === 'senaraiTab') window.muatTurunData();
+        };
+
+        window.switchRoomTab = function(tabId, btnElement) {
+            document.querySelectorAll('.room-options').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.sub-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            btnElement.classList.add('active');
+            let radios = document.querySelectorAll('input[name="bilik"]');
+            radios.forEach(r => r.checked = false);
+        };
+
+        window.switchJadualTab = function(tabId, btnElement) {
+            document.querySelectorAll('.jadual-cat-group').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.j-sub-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            btnElement.classList.add('active');
+        };
+
+        window.toggleDate = function() {
+            let adhoc = document.getElementById("jenisAdhoc").checked;
+            document.getElementById("dateGroup").style.display = adhoc ? "block" : "none";
+            let hariDropdown = document.getElementById("hari");
+            if(adhoc) { hariDropdown.disabled = true; window.syncHari(); } 
+            else { hariDropdown.disabled = false; }
+        };
+
+        window.syncHari = function() {
+            let tarikhVal = document.getElementById("tarikh").value;
+            if(tarikhVal) {
+                let d = new Date(tarikhVal);
+                let hariMalay = ["Ahad", "Isnin", "Selasa", "Rabu", "Khamis", "Jumaat", "Sabtu"];
+                document.getElementById("hari").value = hariMalay[d.getDay()];
+            }
+        };
+
+        window.simpanTempahan = async function() {
+            let bilikObj = document.querySelector('input[name="bilik"]:checked');
+            let bilik = bilikObj ? bilikObj.value : "";
+            
+            let jenis = document.querySelector('input[name="jenis"]:checked').value;
+            let tarikh = document.getElementById("tarikh").value;
+            let hari = document.getElementById("hari").value;
+            let masaMula = document.getElementById("masaMula").value;
+            let masaTamat = document.getElementById("masaTamat").value;
+            let nama = document.getElementById("nama").value;
+
+            let trans = langDict[currentLang];
+            
+            if(!bilik) return alert(trans.alert_room);
+            if(jenis === "Ad-Hoc" && !tarikh) return alert(trans.alert_date);
+            if(!hari) return alert(trans.alert_day);
+            if(!masaMula || !masaTamat) return alert(trans.alert_time);
+            if(parseInt(masaMula) >= parseInt(masaTamat)) return alert(trans.alert_logic);
+            if(!nama) return alert(trans.alert_name);
+
+            let perlukanPassword = bilikKategori['lab'].includes(bilik) || bilikKategori['fac'].includes(bilik);
+            
+            if (perlukanPassword) {
+                let password = prompt(trans.prompt_admin_book);
+                if (password === null) return; 
+                
+                if (password !== KATA_LALUAN_ADMIN) {
+                    alert(trans.alert_wrong_pass);
+                    return;
+                }
+            }
+
+            let isOverlap = tempahanList.some(t => {
+                if (t.bilik === bilik && t.hari === hari) {
+                    let timeClash = (parseInt(masaMula) < parseInt(t.masaTamat)) && (parseInt(masaTamat) > parseInt(t.masaMula));
+                    if (timeClash) {
+                        if (jenis === "Semester" || t.jenis === "Semester") return true; 
+                        else if (jenis === "Ad-Hoc" && t.jenis === "Ad-Hoc") { return (t.tarikh === tarikh); }
+                    }
+                } return false;
+            });
+
+            if (isOverlap) { alert(trans.alert_overlap); return; }
+
+            let data = { bilik, jenis, tarikh, hari, masaMula, masaTamat, nama, timestamp: new Date() };
+            let btn = document.getElementById("btn-simpan");
+            let msg = document.getElementById("status-msg");
+            
+            btn.disabled = true; 
+            btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> <span data-i18n="btn_saving">${trans.btn_saving}</span>`;
+            msg.innerHTML = trans.msg_saving;
+
+            try {
+                await addDoc(collection(db, "tempahan"), data);
+                
+                let formatMula = format12Hour(masaMula);
+                let formatTamat = format12Hour(masaTamat);
+                let butiranTarikh = jenis === "Ad-Hoc" ? tarikh : "Semester (14 Minggu)";
+                
+                let templateParams = {
+                    to_email: `${EMAIL_ADMIN_1}, ${EMAIL_ADMIN_2}`,
+                    bilik: bilik,
+                    nama: nama,
+                    jenis: jenis,
+                    tarikh: butiranTarikh,
+                    hari: hari,
+                    masa: `${formatMula} - ${formatTamat}`
+                };
+                
+                emailjs.send("service_vsjo5zg", "template_ba210rp", templateParams).catch(err => console.log(err));
+
+                alert(trans.alert_success);
+                document.getElementById("bookingForm").reset();
+                window.toggleDate(); 
+                btn.disabled = false; 
+                btn.innerHTML = `<i class="fa-solid fa-cloud-arrow-up"></i> <span data-i18n="btn_save">${trans.btn_save}</span>`; 
+                msg.innerHTML = ""; 
+                window.muatTurunData();
+            } catch (error) {
+                console.error("Error:", error);
+                alert(trans.alert_err); 
+                btn.disabled = false; 
+                btn.innerHTML = `<i class="fa-solid fa-cloud-arrow-up"></i> <span data-i18n="btn_save">${trans.btn_save}</span>`; 
+                msg.innerHTML = "";
+            }
+        };
+
+        window.muatTurunData = async function() {
+            let trans = langDict[currentLang];
+            let status1 = document.getElementById("status-jadual");
+            let status2 = document.getElementById("status-senarai");
+            
+            let loadHtml = `<i class="fa-solid fa-circle-notch fa-spin"></i> <span data-i18n="status_load">${trans.status_load}</span>`;
+            status1.innerHTML = loadHtml; status1.style.display = "flex";
+            status2.innerHTML = loadHtml; status2.style.display = "flex";
+            
+            try {
+                const querySnapshot = await getDocs(collection(db, "tempahan"));
+                tempahanList = [];
+                querySnapshot.forEach((doc) => {
+                    let d = doc.data();
+                    d.id = doc.id; 
+                    tempahanList.push(d);
+                });
+                renderTable(); 
+                renderSenarai(); 
+                status1.style.display = "none";
+                status2.style.display = "none";
+            } catch (error) {
+                console.error("Error:", error);
+                let errHtml = `<i class="fa-solid fa-triangle-exclamation"></i> <span>${trans.status_fail}</span>`;
+                status1.innerHTML = errHtml; status1.style.color = "#b91c1c";
+                status2.innerHTML = errHtml; status2.style.color = "#b91c1c";
+            }
+        };
+
+        window.batalTempahan = async function(docId) {
+            let trans = langDict[currentLang];
+            let password = prompt(trans.prompt_pass);
+            if (!password) return; 
+            
+            if (password !== KATA_LALUAN_ADMIN) {
+                alert(trans.del_fail);
+                return;
+            }
+
+            let status = document.getElementById("status-senarai");
+            status.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> <span>${trans.msg_delete}</span>`;
+            status.style.display = "flex"; status.style.color = "#0f172a";
+
+            try {
+                await deleteDoc(doc(db, "tempahan", docId));
+                alert(trans.del_success); 
+                window.muatTurunData();
+            } catch (error) {
+                console.error("Error:", error);
+                alert(trans.alert_err); status.style.display = "none";
+            }
+        };
+
+        const mapHari = { 'Isnin': 'day_mon', 'Selasa': 'day_tue', 'Rabu': 'day_wed', 'Khamis': 'day_thu', 'Jumaat': 'day_fri', 'Sabtu': 'day_sat', 'Ahad': 'day_sun' };
+
+        function renderTable() {
+            let trans = langDict[currentLang];
+            
+            for (const [katKey, senaraiBilik] of Object.entries(bilikKategori)) {
+                let container = document.getElementById("j-cat-" + katKey);
+                let html = "";
+                
+                let iconClass = katKey === 'tut' ? 'fa-chalkboard-user' : (katKey === 'lab' ? 'fa-computer' : 'fa-users-rectangle');
+
+                senaraiBilik.forEach(bilik => {
+                    html += `<div class="room-title"><i class="fa-solid ${iconClass}"></i> ${bilik}</div><div class="table-responsive"><table style="min-width:1400px;"><thead><tr><th style="width: 110px;">${trans.th_day_time}</th>`;
+                    waktuList.forEach(waktu => html += `<th>${waktu.labelSlot}</th>`);
+                    html += `</tr></thead><tbody>`;
+
+                    hariList.forEach(h => {
+                        let labelHari = trans[mapHari[h]];
+                        html += `<tr><td>${labelHari}</td>`;
+                        
+                        let skipHours = 0; 
+                        
+                        for (let i = 0; i < waktuList.length; i++) {
+                            if (skipHours > 0) {
+                                skipHours--;
+                                continue;
+                            }
+                            
+                            let waktu = waktuList[i];
+                            let slotInt = waktu.valMula;
+                            
+                            let tempahanSemasa = tempahanList.filter(t => 
+                                t.bilik === bilik && t.hari === h && 
+                                parseInt(t.masaMula) <= slotInt && parseInt(t.masaTamat) > slotInt
+                            );
+                            
+                            if (tempahanSemasa.length > 0) {
+                                let maxTamat = Math.max(...tempahanSemasa.map(t => parseInt(t.masaTamat)));
+                                let maxValidTamat = maxTamat > 22 ? 22 : maxTamat; 
+                                let duration = maxValidTamat - slotInt;
+                                
+                                html += `<td colspan="${duration}" style="padding: 0; background-color:#ffffff;">`;
+                                
+                                tempahanSemasa.forEach(t => {
+                                    let tarikhTeks = t.tarikh ? t.tarikh : "";
+                                    if(tarikhTeks) { let parts = tarikhTeks.split('-'); tarikhTeks = `${parts[2]}/${parts[1]}/${parts[0]}`; }
+                                    
+                                    let iconBadge = t.jenis === "Ad-Hoc" ? 'fa-calendar-day' : 'fa-book-open';
+                                    let detail = t.jenis === "Ad-Hoc" ? `<br><small style="color:#64748b;"><i class="fa-solid ${iconBadge}"></i> ${tarikhTeks}</small>` : `<br><small style="color:#64748b;"><i class="fa-solid ${iconBadge}"></i> ${trans.txt_sem_badge}</small>`;
+                                    
+                                    html += `<div class="booking-slot"><strong>${t.nama}</strong>${detail}</div>`;
+                                });
+                                
+                                html += `</td>`;
+                                skipHours = duration - 1;
+                            } else {
+                                html += `<td></td>`;
+                            }
+                        }
+                        
+                        html += `</tr>`;
+                    });
+                    html += `</tbody></table></div>`;
+                });
+                
+                container.innerHTML = html;
+            }
+        }
+
+        function renderSenarai() {
+            let tbody = document.getElementById("senarai-body");
+            let trans = langDict[currentLang];
+            let html = "";
+
+            if(tempahanList.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#64748b; padding:40px;"><i class="fa-solid fa-folder-open" style="font-size:30px; margin-bottom:10px; color:#cbd5e1;"></i><br>Tiada rekod tempahan dijumpai.</td></tr>`;
+                return;
+            }
+
+            tempahanList.forEach(t => {
+                let mula = format12Hour(t.masaMula);
+                let tamat = format12Hour(t.masaTamat);
+                let tarikhText = "-";
+                
+                if (t.tarikh) {
+                    let p = t.tarikh.split('-'); 
+                    tarikhText = `${p[2]}/${p[1]}/${p[0]}`;
+                }
+
+                let hariLocal = trans[mapHari[t.hari]];
+                let dateTimeTeks = t.jenis === 'Ad-Hoc' 
+                    ? `<strong style="color:#0f172a;">${tarikhText}</strong> (${hariLocal})<br><span style="color:#64748b; font-size:12px;"><i class="fa-regular fa-clock"></i> ${mula} - ${tamat}</span>` 
+                    : `<strong style="color:#0f172a;">${trans.txt_sem_badge}</strong> (${hariLocal})<br><span style="color:#64748b; font-size:12px;"><i class="fa-regular fa-clock"></i> ${mula} - ${tamat}</span>`;
+                
+                let jenisTeks = t.jenis === 'Ad-Hoc' ? 'Ad-Hoc' : trans.txt_sem_badge;
+                let iconBadge = t.jenis === 'Ad-Hoc' ? 'fa-calendar-day' : 'fa-book-open';
+                
+                let badgeClass = t.jenis === 'Ad-Hoc' ? 'badge badge-adhoc' : 'badge badge-sem';
+
+                html += `<tr>
+                    <td><strong style="color:#1e40af;">${t.bilik}</strong></td>
+                    <td style="font-weight:500;">${t.nama}</td>
+                    <td><span class="${badgeClass}"><i class="fa-solid ${iconBadge}"></i> ${jenisTeks}</span></td>
+                    <td>${dateTimeTeks}</td>
+                    <td>
+                        <button class="btn-batal" onclick="batalTempahan('${t.id}')"><i class="fa-solid fa-trash-can"></i> ${trans.txt_cancel}</button>
+                    </td>
+                </tr>`;
+            });
+            
+            tbody.innerHTML = html;
+        }
+
+        window.exportHTMLToWord = function() {
+            var preHtml = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Jadual Tempahan PPSM</title><style>@page WordSection1 {size: 841.9pt 595.3pt; mso-page-orientation: landscape; margin: 0.5in 0.5in 0.5in 0.5in;} div.WordSection1 {page: WordSection1;} table {width: 100%; border-collapse: collapse; margin-bottom: 30px; font-family: Arial, sans-serif;} th, td {border: 1px solid #000; padding: 6px; text-align: center; vertical-align: middle; font-size: 11px;} th {background-color: #f2f2f2; font-weight: bold;} .room-title {color: #000; margin-top: 30px; font-family: Arial; font-weight: bold; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 10px;} .booking-slot {font-size: 11px; margin: 2px; border: 1px solid #333; padding: 4px; background: #eef2f5; font-weight: bold; text-align: left;}</style></head><body><div class='WordSection1'>";
+            var postHtml = "</div></body></html>";
+            
+            var jadualContent = document.getElementById("j-cat-tut").innerHTML + 
+                                document.getElementById("j-cat-lab").innerHTML + 
+                                document.getElementById("j-cat-fac").innerHTML;
+            
+            // Buang icon FontAwesome sebelum print ke Word
+            jadualContent = jadualContent.replace(/<i class="[^"]*"><\/i>/g, '');
+            
+            var html = preHtml + jadualContent + postHtml;
+            var blob = new Blob(['\ufeff', html], { type: 'application/msword' });
+            var url = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(html);
+            
+            var downloadLink = document.createElement("a");
+            document.body.appendChild(downloadLink);
+            downloadLink.href = url; downloadLink.download = 'Jadual_Tempahan_PPSM.doc'; downloadLink.click();
+            document.body.removeChild(downloadLink);
+        };
+    </script>
+</body>
+</html>
